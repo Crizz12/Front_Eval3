@@ -58,13 +58,13 @@ public class StaticPageGenerator {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Productos</title>
+    <title>Gestión de Productos - Eval3</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>Gestión de Productos</h1>
+            <h1>Gestión de Productos - Eval3</h1>
             <nav>
                 <button class="nav-btn active" onclick="showSection('products')">Productos</button>
                 <button class="nav-btn" onclick="showSection('register')">Registro</button>
@@ -113,7 +113,7 @@ public class StaticPageGenerator {
         </main>
         
         <footer>
-            <p>&copy; 2026 Sistema de Gestión de Productos</p>
+            <p>&copy; 2026 Sistema de Gestión de Productos - Eval3</p>
         </footer>
     </div>
     
