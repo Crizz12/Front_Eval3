@@ -1,66 +1,48 @@
 # Frontend - Gestión de Productos
 
-Frontend en Java que genera una página estática HTML para gestión de productos.
+Frontend en Java/Maven que genera una página estática HTML servida por Nginx, desplegada en AWS ECS Fargate.
 
-## Características
+## Arquitectura
 
-- Registro de usuarios
-- Visualización de productos (solo lectura, no se puede comprar)
-- Interfaz moderna y responsiva
-- Almacenamiento local de usuarios registrados (localStorage)
+- **Tecnología**: Java 17 + Maven + Nginx
+- **Contenedor**: Docker (imagen multi-stage: Maven para compilar, Nginx para servir)
+- **Orquestación**: AWS ECS Fargate
+- **Registro de imágenes**: Amazon ECR
+- **Balanceador**: Application Load Balancer (ALB)
+- **URL pública**: http://eval3-alb-810585078.us-east-1.elb.amazonaws.com
 
-## Requisitos
+## Funcionalidades
 
-- Java 17 o superior
-- Maven 3.6 o superior
+- Catálogo de productos (consume `/api/products` via ALB → product-service)
+- Registro de usuarios (consume `/api/users` via ALB → user-service)
+- Diseño responsivo
 
-## Build
+## Pipeline CI/CD
 
-Para generar la página estática:
+Cada commit a `main` dispara automáticamente el workflow `.github/workflows/deploy.yml`:
+1. **Build**: compila el proyecto y construye la imagen Docker
+2. **Push**: sube la imagen a Amazon ECR
+3. **Deploy**: fuerza un nuevo despliegue en ECS (`update-service --force-new-deployment`)
+
+## Variables de entorno
+
+| Variable | Descripción |
+|----------|-------------|
+| No requiere variables de entorno en runtime | El frontend es estático servido por Nginx |
+
+## Autoscaling
+
+Configurado con Target Tracking al 50% de CPU:
+- Mínimo: 1 task
+- Máximo: 3 tasks
+- Si CPU supera 50%, ECS agrega tasks automáticamente
+
+## Cómo ejecutar localmente
 
 ```bash
 mvn clean compile exec:java
 ```
+Abre `output/index.html` en el navegador.
 
-Esto generará los archivos estáticos en el directorio `output/`:
-- `index.html` - Página principal
-- `styles.css` - Estilos CSS
-- `script.js` - Funcionalidad JavaScript
+## Estructura del proyecto
 
-## Ejecutar
-
-Abra el archivo `output/index.html` en su navegador web.
-
-## Estructura del Proyecto
-
-```
-front/
-├── pom.xml                          # Configuración Maven
-├── README.md                        # Este archivo
-├── src/
-│   └── main/
-│       ├── java/
-│       │   └── com/
-│       │       └── eval3/
-│       │           └── frontend/
-│       │               └── StaticPageGenerator.java  # Generador de páginas
-│       └── resources/
-└── output/                          # Directorio generado con archivos estáticos
-    ├── index.html
-    ├── styles.css
-    └── script.js
-```
-
-## Funcionalidades
-
-### Registro de Usuarios
-- Formulario de registro con validación
-- Almacenamiento en localStorage
-- Validación de contraseñas
-- Prevención de duplicados
-
-### Visualización de Productos
-- Grid de productos con información detallada
-- 8 productos de ejemplo pre-cargados
-- Diseño responsivo
-- Solo lectura (no se pueden realizar compras)
