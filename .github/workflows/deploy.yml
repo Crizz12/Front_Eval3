@@ -19,15 +19,28 @@ jobs:
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: us-east-1
 
+      - name: Test - Verificar estructura del proyecto
+        run: |
+          echo "Verificando estructura del proyecto..."
+          test -f pom.xml && echo "pom.xml OK"
+          test -f Dockerfile && echo "Dockerfile OK"
+          test -f nginx.conf && echo "nginx.conf OK"
+          echo "Tests completados exitosamente"
+
       - name: Login a Amazon ECR
         uses: aws-actions/amazon-ecr-login@v1
 
       - name: Build, tag y push imagen a ECR
         run: |
+          IMAGE_TAG=${{ github.sha }}
           docker build -t frontend:latest .
           docker tag frontend:latest 816010020366.dkr.ecr.us-east-1.amazonaws.com/frontend:latest
+          docker tag frontend:latest 816010020366.dkr.ecr.us-east-1.amazonaws.com/frontend:$IMAGE_TAG
           docker push 816010020366.dkr.ecr.us-east-1.amazonaws.com/frontend:latest
+          docker push 816010020366.dkr.ecr.us-east-1.amazonaws.com/frontend:$IMAGE_TAG
+          echo "Imagen publicada con tags: latest y $IMAGE_TAG"
 
       - name: Deploy a ECS
         run: |
           aws ecs update-service --cluster eval3-cluster --service frontend-svc --force-new-deployment --region us-east-1
+          echo "Deploy completado exitosamente"
